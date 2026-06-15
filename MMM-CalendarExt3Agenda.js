@@ -1,5 +1,14 @@
 /* global config Module Log */
 
+function normalizeNotifications(options, defaultNotifications = {}) {
+  return {
+    weatherNotification: options.weatherNotification ?? defaultNotifications.weatherNotification,
+    weatherPayload: (typeof options.weatherPayload === 'function') ? options.weatherPayload : defaultNotifications.weatherPayload,
+    eventNotification: options.eventNotification ?? defaultNotifications.eventNotification,
+    eventPayload: (typeof options.eventPayload === 'function') ? options.eventPayload : defaultNotifications.eventPayload,
+  }
+}
+
 Module.register('MMM-CalendarExt3Agenda', {
   requiresVersion: '2.36.0',
   defaults: {
@@ -98,29 +107,29 @@ Module.register('MMM-CalendarExt3Agenda', {
     this._functionsReady()
   },
 
-
   regularizeConfig: function (options) {
-    const weekInfoFallback = {
+    const fallbackWeekInfo = {
       firstDay: 1,
-      minDays: 4
+      minimalDays: 4,
+      weekend: [6, 7]
     }
 
     options.locale = Intl.getCanonicalLocales(options.locale ?? config?.locale ?? config?.language)?.[ 0 ] ?? ''
-    const calInfo = new Intl.Locale(options.locale)
-    if (calInfo?.weekInfo) {
-      options.firstDayOfWeek = (options.firstDayOfWeek !== null) ? options.firstDayOfWeek : (calInfo.weekInfo?.firstDay ?? weekInfoFallback.firstDay)
-      options.minimalDaysOfNewYear = (options.minimalDaysOfNewYear !== null) ? options.minimalDaysOfNewYear : (calInfo.weekInfo?.minimalDays ?? weekInfoFallback.minDays)
-      options.weekends = ((Array.isArray(options.weekends) && options.weekends?.length) ? options.weekends : (calInfo.weekInfo?.weekend ?? [])).map(d => d % 7)
+    const weekInfo = {
+      ...fallbackWeekInfo,
+      ...(new Intl.Locale(options.locale).weekInfo ?? {})
     }
+    const weekends = (Array.isArray(options.weekends) && options.weekends.length)
+      ? options.weekends
+      : weekInfo.weekend
+
+    options.firstDayOfWeek = options.firstDayOfWeek ?? weekInfo.firstDay
+    options.minimalDaysOfNewYear = options.minimalDaysOfNewYear ?? weekInfo.minimalDays
+    options.weekends = weekends.map(day => day % 7)
 
     options.instanceId = options.instanceId ?? this.identifier
     options.showMiniMonthCalendarMonths = Math.max(1, Math.min(options.showMiniMonthCalendarMonths ?? 1, 6))
-    this.notifications = {
-      weatherNotification: options.weatherNotification ?? this.defaulNotifications.weatherNotification,
-      weatherPayload: (typeof options.weatherPayload === 'function') ? options.weatherPayload : this.defaulNotifications.weatherPayload,
-      eventNotification: options.eventNotification ?? this.defaulNotifications.eventNotification,
-      eventPayload: (typeof options.eventPayload === 'function') ? options.eventPayload : this.defaulNotifications.eventPayload,
-    }
+    this.notifications = normalizeNotifications(options, this.defaulNotifications)
 
     return options
   },
