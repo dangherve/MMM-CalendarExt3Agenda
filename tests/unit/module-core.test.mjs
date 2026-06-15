@@ -31,7 +31,7 @@ function makeRegularizeCtx(overrides = {}) {
   return {
     identifier: "module-1",
     config: { calendarSet: [] },
-    defaulNotifications: moduleDef.defaulNotifications,
+    defaultNotifications: moduleDef.defaultNotifications,
     ...overrides,
   }
 }
@@ -50,7 +50,7 @@ function makeSocketRestoreCtx(overrides = {}) {
 function makeNotificationCtx(overrides = {}) {
   return {
     identifier: "module-1",
-    defaulNotifications: moduleDef.defaulNotifications,
+    defaultNotifications: moduleDef.defaultNotifications,
     notifications: {
       eventNotification: "CALENDAR_EVENTS",
       eventPayload: (p) => p,
@@ -155,8 +155,8 @@ describe("regularizeConfig", () => {
       eventPayload: null,
     })
 
-    assert.equal(ctx.notifications.weatherPayload, moduleDef.defaulNotifications.weatherPayload)
-    assert.equal(ctx.notifications.eventPayload, moduleDef.defaulNotifications.eventPayload)
+    assert.equal(ctx.notifications.weatherPayload, moduleDef.defaultNotifications.weatherPayload)
+    assert.equal(ctx.notifications.eventPayload, moduleDef.defaultNotifications.eventPayload)
   })
 })
 

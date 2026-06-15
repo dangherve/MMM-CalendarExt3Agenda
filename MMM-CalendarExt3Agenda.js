@@ -63,7 +63,7 @@ Module.register('MMM-CalendarExt3Agenda', {
     },
   },
 
-  defaulNotifications: {
+  defaultNotifications: {
     weatherNotification: 'WEATHER_UPDATED',
     weatherPayload: (payload) => { return payload },
     eventNotification: 'CALENDAR_EVENTS',
@@ -129,7 +129,7 @@ Module.register('MMM-CalendarExt3Agenda', {
 
     options.instanceId = options.instanceId ?? this.identifier
     options.showMiniMonthCalendarMonths = Math.max(1, Math.min(options.showMiniMonthCalendarMonths ?? 1, 6))
-    this.notifications = normalizeNotifications(options, this.defaulNotifications)
+    this.notifications = normalizeNotifications(options, this.defaultNotifications)
 
     return options
   },
