@@ -9,6 +9,64 @@ function normalizeNotifications(options, defaultNotifications = {}) {
   }
 }
 
+function isSameDate(left, right) {
+  return (
+    left.getFullYear() === right.getFullYear()
+    && left.getMonth() === right.getMonth()
+    && left.getDate() === right.getDate()
+  )
+}
+
+function isEventOverlapping(ev, startTime, endTime) {
+  return !(ev.endDate <= startTime || ev.startDate >= endTime)
+}
+
+function getDisplayDayTimeForEvent(ev, showMultidayEventsOnce, viewStartTime) {
+  if (!(showMultidayEventsOnce && ev.isMultiday)) return null
+  const startDay = new Date(+ev.startDate)
+  const normalizedStartDay = new Date(startDay.getFullYear(), startDay.getMonth(), startDay.getDate()).getTime()
+  if (viewStartTime === null) return normalizedStartDay
+  // When the event started before the current view window, pin it to the first visible day.
+  return Math.max(normalizedStartDay, viewStartTime)
+}
+
+function splitVisibleEventsByType(visibleEvents, showMultidayEventsOnce) {
+  return visibleEvents.reduce((result, ev) => {
+    const target = (showMultidayEventsOnce && ev.isMultiday)
+      ? result.mvs
+      : ((ev.isFullday) ? result.fevs : result.sevs)
+    target.push(ev)
+    return result
+  }, { mvs: [], fevs: [], sevs: [] })
+}
+
+function getEventsByDate({ events, startTime, dayCounts }) {
+  const groupedByDate = events.reduce((days, ev) => {
+    let st = new Date(+ev.startDate)
+    const et = new Date(+ev.endDate)
+    if (et.getTime() <= startTime) return days
+
+    while (st.getTime() < et.getTime()) {
+      const day = new Date(st.getFullYear(), st.getMonth(), st.getDate(), 0, 0, 0, 0).getTime()
+      if (!days.has(day)) days.set(day, [])
+      days.get(day).push(ev)
+      st.setDate(st.getDate() + 1)
+    }
+    return days
+  }, new Map())
+
+  const startDay = new Date(+startTime).setHours(0, 0, 0, 0)
+  const days = Array.from(groupedByDate.keys()).sort()
+  const position = days.findIndex((d) => d >= startDay)
+
+  return days.slice(position, position + dayCounts).map((d) => {
+    return {
+      date: d,
+      events: groupedByDate.get(d)
+    }
+  })
+}
+
 Module.register('MMM-CalendarExt3Agenda', {
   requiresVersion: '2.36.0',
   defaults: {
@@ -270,38 +328,12 @@ Module.register('MMM-CalendarExt3Agenda', {
     dom.innerHTML = ''
 
     const prepareAgenda = (targetEvents) => {
-      const eventsByDate = ({ events, startTime, dayCounts }) => {
-        let ebd = events.reduce((days, ev) => {
-          let st = new Date(+ev.startDate)
-          let et = new Date(+ev.endDate)
-          if (et.getTime() <= startTime) return days
-
-          while(st.getTime() < et.getTime()) {
-            let day = new Date(st.getFullYear(), st.getMonth(), st.getDate(), 0, 0, 0, 0).getTime()
-            if (!days.has(day)) days.set(day, [])
-            days.get(day).push(ev)
-            st.setDate(st.getDate() + 1)
-          }
-          return days
-        }, new Map())
-
-        let startDay = new Date(+startTime).setHours(0, 0, 0, 0)
-        let days = Array.from(ebd.keys()).sort()
-        let position = days.findIndex((d) => d >= startDay)
-
-        return days.slice(position, position + dayCounts).map((d) => {
-          return {
-            date: d,
-            events: ebd.get(d)
-          }
-        })
-      }
       let events
       let boc = getRelativeDate(moment, options.startDayIndex).valueOf()
       let eoc = getRelativeDate(moment, options.endDayIndex + 1).valueOf()
       let dateIndex = []
       if (options.onlyEventDays >= 1) {
-        let ebd = eventsByDate({
+        let ebd = getEventsByDate({
           events: targetEvents,
           startTime: boc,
           dayCounts: options.onlyEventDays
@@ -397,40 +429,19 @@ Module.register('MMM-CalendarExt3Agenda', {
       agenda.classList.add('agenda')
       dateIndex = dateIndex.sort((a, b) => a - b)
       const viewStartTime = dateIndex[0] ?? null
-      const sameDate = (left, right) => {
-        return (
-          left.getFullYear() === right.getFullYear()
-          && left.getMonth() === right.getMonth()
-          && left.getDate() === right.getDate()
-        )
-      }
-      const getDisplayDayTime = (ev) => {
-        if (!(options.showMultidayEventsOnce && ev.isMultiday)) return null
-        const startDay = new Date(+ev.startDate)
-        const normalizedStartDay = new Date(startDay.getFullYear(), startDay.getMonth(), startDay.getDate()).getTime()
-        if (viewStartTime === null) return normalizedStartDay
-        // When the event started before the current view window, pin it to the first visible day.
-        return Math.max(normalizedStartDay, viewStartTime)
-      }
       for (const [i, date] of dateIndex.entries()) {
         let tm = new Date(date)
         let eotm = new Date(tm.getFullYear(), tm.getMonth(), tm.getDate(), 23, 59, 59, 999)
         let dayDom = makeCellDom(tm, i)
         let body = dayDom.getElementsByClassName('cellBody')[0]
         let visibleEvents = events.filter((ev) => {
-          return !(ev.endDate <= tm.getTime() || ev.startDate >= eotm.getTime())
+          return isEventOverlapping(ev, tm.getTime(), eotm.getTime())
         }).filter((ev) => {
-          const displayDayTime = getDisplayDayTime(ev)
+          const displayDayTime = getDisplayDayTimeForEvent(ev, options.showMultidayEventsOnce, viewStartTime)
           if (displayDayTime === null) return true
-          return sameDate(new Date(displayDayTime), tm)
+          return isSameDate(new Date(displayDayTime), tm)
         })
-        let {mvs, fevs, sevs} = visibleEvents.reduce((result, ev) => {
-          const target = (options.showMultidayEventsOnce && ev.isMultiday)
-            ? result.mvs
-            : ((ev.isFullday) ? result.fevs : result.sevs)
-          target.push(ev)
-          return result
-        }, {mvs: [], fevs: [], sevs: []})
+        let { mvs, fevs, sevs } = splitVisibleEventsByType(visibleEvents, options.showMultidayEventsOnce)
         let eventCounts = mvs.length + fevs.length + sevs.length
         dayDom.dataset.eventsCounts = eventCounts
         if (eventCounts === 0 && options.onlyEventDays >= 1) continue
@@ -534,7 +545,7 @@ Module.register('MMM-CalendarExt3Agenda', {
           evs.classList.add('events')
           let edm = new Date(dm.getFullYear(), dm.getMonth(), dm.getDate(), 23, 59, 59, 999)
           events.filter((ev) => {
-            return !(+(ev.endDate) <= dm.getTime() || +(ev.startDate) >= edm.getTime())
+            return isEventOverlapping(ev, dm.getTime(), edm.getTime())
           }).sort((a, b) => {
             return ((a.endDate - a.startDate) === (b.endDate - b.startDate))
               ? (a.startDate === b.startDate) ? a.endDate - b.endDate : a.startDate - b.startDate
