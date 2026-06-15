@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.0.4](https://github.com/MMRIZE/MMM-CalendarExt3Agenda/compare/v2.0.3...v2.0.4) (2026-06-15)
+
+
+### Fixed
+
+* simplify config normalization and add robust Intl week fallback ([0a5ac2a](https://github.com/MMRIZE/MMM-CalendarExt3Agenda/commit/0a5ac2acfc82d433bda886bb3abf3ae7804638ab))
+
+
+### Chores
+
+* add complexity warning lint rules ([72ccf36](https://github.com/MMRIZE/MMM-CalendarExt3Agenda/commit/72ccf36161a33fb63fba1d7b7b9b0ed526af10f3))
+* update devDependencies ([4085651](https://github.com/MMRIZE/MMM-CalendarExt3Agenda/commit/40856517f45b06ce9a6ef0cbfd4986bae3ad4579))
+
+
+### Code Refactoring
+
+* modularize draw event helpers ([87cfee1](https://github.com/MMRIZE/MMM-CalendarExt3Agenda/commit/87cfee1dc0488e5ae16cb0fb5a80230bb199864a))
+* rename defaultNotifications key ([926bd5b](https://github.com/MMRIZE/MMM-CalendarExt3Agenda/commit/926bd5ba07ec0b3102817137f71b19b94d7bb81e))
+* split draw and config handlers ([37c62a7](https://github.com/MMRIZE/MMM-CalendarExt3Agenda/commit/37c62a737ddfe1537797c57a6dd5e9ce6b3b9a85))
+
+
+### Tests
+
+* expand module-core coverage ([1f448ed](https://github.com/MMRIZE/MMM-CalendarExt3Agenda/commit/1f448ed2880acd5c59a3069e64fabcda1fa3249d))
+
 ## [2.0.3](https://github.com/MMRIZE/MMM-CalendarExt3Agenda/compare/v2.0.2...v2.0.3) (2026-05-03)
 
 
