@@ -378,8 +378,9 @@ Module.register('MMM-CalendarExt3Agenda', {
     const dayDom = document.createElement('div')
     dayDom.classList.add('cellDay')
     const gap = gapFromToday(tm, options)
-    const p = new Intl.RelativeTimeFormat(options.locale, { ...options.relativeNamedDayOptions, numeric: "auto" })
-    const pv = new Intl.RelativeTimeFormat(options.locale, { ...options.relativeNamedDayStyle, numeric: "always"})
+    const relativeDayStyle = options.relativeNamedDayStyle ?? 'narrow'
+    const p = new Intl.RelativeTimeFormat(options.locale, { style: relativeDayStyle, numeric: 'auto' })
+    const pv = new Intl.RelativeTimeFormat(options.locale, { style: relativeDayStyle, numeric: 'always' })
     if (p.format(gap, "day") !== pv.format(gap, "day")) {
       dayDom.classList.add('relativeDay', 'relativeNamedDay')
     } else {

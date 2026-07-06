@@ -143,7 +143,7 @@ All the properties are omittable, and if omitted, a default value will be applie
 |`showMultidayEventsOnce` | false | When `true`, each multiday event appears only once in the visible range (pinned to its first visible day) instead of repeating on every day it spans. |
 |`multidayRangeLabelOptions` | { month: 'short', day: 'numeric' } | Format for the date range label shown on a multiday event when `showMultidayEventsOnce` is enabled. See [Intl.DateTimeFormat options](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat#parameters). |
 |`skipDuplicated` | true | On `true`, duplicated events(same title, same start/end) from any calendars will be skipped except one. |
-|`relativeNamedDayOptions`| { style: 'long' } | A name of the relative name (e.g. "Today" or "In 2 days" |
+|`relativeNamedDayStyle`| `'narrow'` | Style for relative day names like "Today" or "in 2 days". Possible values: `'narrow'`, `'short'`, `'long'`. |
 
 ## Notification
 ### Incoming Notifications
