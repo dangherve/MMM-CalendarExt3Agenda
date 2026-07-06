@@ -385,6 +385,24 @@ describe("notificationReceived", () => {
     assert.match(ctx.forecast[1].dateId, /^\d{4}-\d{2}-\d{2}$/)
     assert.notEqual(ctx.forecast[0].dateId, ctx.forecast[1].dateId)
   })
+
+  test("should preserve plain YYYY-MM-DD forecast dates without UTC day shifting", () => {
+    const ctx = makeNotificationCtx({
+      activeConfig: {
+        useWeather: true,
+        weatherLocationName: "Berlin",
+        instanceId: "module-1",
+      },
+    })
+
+    moduleDef.notificationReceived.call(ctx, "WEATHER_UPDATED", {
+      locationName: "Berlin, DE",
+      forecastArray: [{ date: "2026-02-01", condition: "sunny" }],
+    })
+
+    assert.equal(ctx.forecast.length, 1)
+    assert.equal(ctx.forecast[0].dateId, "2026-02-01")
+  })
 })
 
 describe("getDom", () => {

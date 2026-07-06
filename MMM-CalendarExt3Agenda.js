@@ -40,6 +40,18 @@ function splitVisibleEventsByType(visibleEvents, showMultidayEventsOnce) {
   }, { mvs: [], fevs: [], sevs: [] })
 }
 
+function getDateKey(dateInput) {
+  if (typeof dateInput === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateInput)) {
+    return dateInput
+  }
+
+  const d = new Date(dateInput)
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 function getEventsByDate({ events, startTime, dayCounts }) {
   const groupedByDate = events.reduce((days, ev) => {
     let st = new Date(+ev.startDate)
@@ -245,8 +257,7 @@ Module.register('MMM-CalendarExt3Agenda', {
 
     if (this.activeConfig.useWeather && locationMatches && hasForecast) {
       this.forecast = [...convertedPayload.forecastArray].map((o) => {
-        const d = new Date(o.date)
-        o.dateId = d.toLocaleDateString('en-CA')
+        o.dateId = getDateKey(o.date)
         return o
       })
       return
@@ -408,7 +419,7 @@ Module.register('MMM-CalendarExt3Agenda', {
 
     const s = document.createElement('div')
     s.classList.add('cellHeaderSub')
-    const forecasted = this.forecast.find((e) => tm.toLocaleDateString('en-CA') === e.dateId)
+    const forecasted = this.forecast.find((e) => getDateKey(tm) === e.dateId)
     makeWeatherDOM(s, forecasted)
     h.appendChild(s)
 
