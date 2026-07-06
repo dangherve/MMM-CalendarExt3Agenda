@@ -324,10 +324,10 @@ Module.register('MMM-CalendarExt3Agenda', {
     return dom
   },
 
-  _prepareAgenda: function (targetEvents, options, moment, getRelativeDate) {
+  _prepareAgenda: function (targetEvents, options, baseDate, getRelativeDate) {
     let events
-    const boc = getRelativeDate(moment, options.startDayIndex).valueOf()
-    const eoc = getRelativeDate(moment, options.endDayIndex + 1).valueOf()
+    const boc = getRelativeDate(baseDate, options.startDayIndex).valueOf()
+    const eoc = getRelativeDate(baseDate, options.endDayIndex + 1).valueOf()
     let dateIndex = []
 
     if (options.onlyEventDays >= 1) {
@@ -344,7 +344,7 @@ Module.register('MMM-CalendarExt3Agenda', {
     } else {
       events = targetEvents.filter((ev) => !(ev.endDate <= boc || ev.startDate >= eoc))
       for (let i = options.startDayIndex; i <= options.endDayIndex; i++) {
-        dateIndex.push(getRelativeDate(moment, i).getTime())
+        dateIndex.push(getRelativeDate(baseDate, i).getTime())
       }
     }
 
@@ -468,10 +468,10 @@ Module.register('MMM-CalendarExt3Agenda', {
     return dom
   },
 
-  _drawMiniMonth: function (dom, events, monthOffset, options, moment, helpers) {
+  _drawMiniMonth: function (dom, events, monthOffset, options, baseDate, helpers) {
     if (!options.showMiniMonthCalendar) return dom
     const { getBeginOfWeek, getWeekNo } = helpers
-    const cm = new Date(moment.getFullYear(), moment.getMonth() + monthOffset, monthOffset === 0 ? moment.getDate() + options.startDayIndex : 1)
+    const cm = new Date(baseDate.getFullYear(), baseDate.getMonth() + monthOffset, monthOffset === 0 ? baseDate.getDate() + options.startDayIndex : 1)
     const bwoc = getBeginOfWeek(new Date(cm.getFullYear(), cm.getMonth(), 1), options)
     const ewoc = getBeginOfWeek(new Date(cm.getFullYear(), cm.getMonth() + 1, 0), options)
     const im = new Date(bwoc.getTime())
@@ -572,7 +572,7 @@ Module.register('MMM-CalendarExt3Agenda', {
     if (!this.library?.loaded) return dom
 
     const t = new Date(Date.now())
-    const moment = new Date(t.getFullYear(), t.getMonth(), t.getDate())
+    const baseDate = new Date(t.getFullYear(), t.getMonth(), t.getDate())
     const {
       isToday, isThisMonth, isThisYear, getWeekNo, makeWeatherDOM,
       getRelativeDate, prepareEvents, getBeginOfWeek,
@@ -585,8 +585,8 @@ Module.register('MMM-CalendarExt3Agenda', {
     }
 
     dom.innerHTML = ''
-    const sm = new Date(moment.getFullYear(), moment.getMonth(), moment.getDate() + options.startDayIndex)
-    const em = new Date(moment.getFullYear(), moment.getMonth(), moment.getDate() + options.endDayIndex)
+    const sm = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate() + options.startDayIndex)
+    const em = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate() + options.endDayIndex)
     const tempPool = new Map()
     this.eventPool.forEach((v, k) => {
       tempPool.set(k, JSON.parse(JSON.stringify(v)))
@@ -606,10 +606,10 @@ Module.register('MMM-CalendarExt3Agenda', {
 
     const copied = JSON.parse(JSON.stringify(targetEvents))
     for (let i = 0; i < options.showMiniMonthCalendarMonths; i++) {
-      dom = this._drawMiniMonth(dom, [...copied], i, options, moment, helpers)
+      dom = this._drawMiniMonth(dom, [...copied], i, options, baseDate, helpers)
     }
 
-    const agenda = this._prepareAgenda([...copied], options, moment, getRelativeDate)
+    const agenda = this._prepareAgenda([...copied], options, baseDate, getRelativeDate)
     dom = this._drawAgenda(dom, agenda, options, helpers)
     return dom
   },
