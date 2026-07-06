@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.0.5](https://github.com/MMRIZE/MMM-CalendarExt3Agenda/compare/v2.0.4...v2.0.5) (2026-07-06)
+
+
+### Fixed
+
+* normalize weather dates with stable date keys ([00461b4](https://github.com/MMRIZE/MMM-CalendarExt3Agenda/commit/00461b42f0b563c4825e58806696c629e75f8c46))
+* use relativeNamedDayStyle correctly and remove broken relativeNamedDayOptions docs ([655337c](https://github.com/MMRIZE/MMM-CalendarExt3Agenda/commit/655337ca8ba1b62d843bff8bd1f6fc5c1f56a2b7))
+
+
+### Chores
+
+* update checkout action ([c518686](https://github.com/MMRIZE/MMM-CalendarExt3Agenda/commit/c51868694588e944f5cd661a7f020c74909143d1))
+* update devDependencies ([50b106a](https://github.com/MMRIZE/MMM-CalendarExt3Agenda/commit/50b106a1c8f69c75b441d729723b25275bf09da8))
+* update subproject commit reference in CX3_Shared ([96cdaab](https://github.com/MMRIZE/MMM-CalendarExt3Agenda/commit/96cdaabc65c69375e4c871041399c98b80d03a73))
+
+
+### Code Refactoring
+
+* rename variables ([96a525a](https://github.com/MMRIZE/MMM-CalendarExt3Agenda/commit/96a525a04a70e63168b33e16e763d2782a5e41f6))
+
 ## [2.0.4](https://github.com/MMRIZE/MMM-CalendarExt3Agenda/compare/v2.0.3...v2.0.4) (2026-06-15)
 
 
